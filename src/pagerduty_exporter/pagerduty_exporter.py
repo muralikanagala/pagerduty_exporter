@@ -27,7 +27,7 @@ def get_generic_data(item_type, params):
 
 
 def active_incident_data():
-    params = {'statuses[]': statuses, 'service_ids[]': service_ids, 'since': '20220102', 'until': '20220103'}
+    params = {'statuses[]': statuses, 'service_ids[]': service_ids}
     return get_generic_data('incidents', params)
 
 
@@ -50,11 +50,6 @@ def escalation_policy_data():
 def active_maintenance_window_data():
     params = {'filter': 'ongoing'}
     return get_generic_data('maintenance_windows', params)
-
-
-class PDMetrics:
-    def __init__(self):
-        """abc"""
 
 
 def cleanup_incident_info():
