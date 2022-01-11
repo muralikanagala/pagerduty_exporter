@@ -1,13 +1,15 @@
 import time
+from flask import Flask, Response
 
 from pdpyras import APISession
-from prometheus_client import Gauge, start_http_server
+from prometheus_client import Gauge, CollectorRegistry, generate_latest
 
+registry = CollectorRegistry()
 api_token = 'token_here'
 session = APISession(api_token)
 service_ids = [
-    'xxxx',
-    'yyyy'
+    'XXXXX',
+    'YYYYY'
 ]
 statuses = (
     'triggered',
@@ -53,6 +55,7 @@ def active_maintenance_window_data():
 
 
 def cleanup_incident_info():
+    print("getting data")
     cleaned_up_incident_data = []
     for key_item, data in active_incident_data().items():
         temp_dict = {
@@ -68,9 +71,15 @@ def cleanup_incident_info():
 
 incident_info_gauge = Gauge('incident_info', 'pagerduty incident information',
                             ('status', 'service', 'urgency', 'title', 'id'))
-start_http_server(8080)
 
-while True:
+my_app = Flask(__name__)
+
+
+@my_app.route('/metrics', methods=['GET'])
+def get_data():
     for item in cleanup_incident_info():
         incident_info_gauge.labels(**item).set(1)
-    time.sleep(10)
+    return Response(generate_latest(), mimetype='text/plain')
+
+
+my_app.run(host='0.0.0.0', port=8080)
